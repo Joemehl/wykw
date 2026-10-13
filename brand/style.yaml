@@ -1,0 +1,67 @@
+# Whatcha Know Wednesday: house style.
+# Every render reads this file. Change it here, not in code.
+# Values marked TODO are placeholders until we match them to a real past episode.
+
+show:
+  name: "Whatcha Know Wednesday"
+  brand: "Alliance RV"
+  hashtag: "#WhatchaKnowWednesday"
+  handle: "@AllianceRV"             # TODO: confirm the handle you tag on each platform
+
+colors:                             # hex RGB
+  primary: "#0B2545"                # TODO: Alliance RV brand navy
+  accent: "#F5B700"                 # TODO: the highlight color for the spoken word / banners
+  text: "#FFFFFF"
+  outline: "#000000"
+
+fonts:
+  dir: brand/fonts
+  caption: "Anton"                  # tall condensed font, reads well on phones
+  title: "Montserrat ExtraBold"
+
+# Each entry is one deliverable rendered from the same edit.
+formats:
+  vertical:   {width: 1080, height: 1920, fps: 30}   # Reels / TikTok / Shorts / FB Reels
+  # square:   {width: 1080, height: 1080, fps: 30}   # FB/IG feed: uncomment if you post it
+  # wide:     {width: 1920, height: 1080, fps: 30}   # YouTube long-form
+
+framing:
+  fit: crop                         # crop = fill the frame (talking head); blur = letterbox on blurred copy
+  crop_center_x: 0.5                # 0 = left edge, 1 = right edge; shift if the host stands off-center
+  punch_in: 1.12                    # alternate jump cuts between 1.0x and this zoom for energy (1.0 = off)
+
+cutting:
+  max_pause: 0.55                   # seconds of silence allowed before we cut it out
+  pad: 0.10                         # breathing room kept around each spoken segment
+  min_segment: 0.40                 # drop crumbs shorter than this
+  fillers: ["um", "uh", "uhm", "erm", "ah", "hmm", "mm"]
+
+captions:
+  enabled: true
+  words_per_line: 3
+  size: 0.058                       # fraction of video height
+  position_y: 0.68                  # fraction of height for the caption baseline
+  uppercase: true
+  highlight_active_word: true
+
+hook:                               # big text over the first seconds: stops the scroll
+  duration: 3.0
+  banner_text: "WHATCHA KNOW WEDNESDAY"
+
+endcard:                            # used only when brand/assets/outro.mp4 is missing
+  duration: 2.5
+  text: "NEW RV TIPS EVERY WEDNESDAY"
+  subtext: "Follow @AllianceRV"
+
+audio:
+  loudness_lufs: -14                # social platform target
+  music_volume: 0.12                # bed level under the voice (ducked further while talking)
+
+assets:                             # optional: dropped in brand/assets/, used automatically when present
+  logo: brand/assets/logo.png       # transparent PNG bug, top-right
+  intro: brand/assets/intro.mp4     # branded sting before the episode
+  outro: brand/assets/outro.mp4     # branded end card
+  music: brand/assets/music.mp3     # licensed music bed
+
+transcription:
+  model: small.en                   # faster-whisper model; base.en is faster, medium.en more accurate

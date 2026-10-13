@@ -1,0 +1,10 @@
+# Raw footage and renders are large: keep them out of git (deliver renders via the Claude app)
+weeks/*/raw/
+weeks/*/work/
+weeks/*/out/*.mp4
+weeks/*/out/*.jpg
+__pycache__/
+*.pyc
+.venv/
+.models/
+weeks/smoke-test/

@@ -93,7 +93,8 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Caption,{f['caption']},{size},{text},{accent},{outline},&H80000000,0,0,0,0,100,100,1,0,1,{max(3, size // 12)},{max(2, size // 25)},2,60,60,{cap_margin},1
+Style: Caption,{f['caption']},{size},{text},{accent},{outline},&H60000000,0,0,0,0,100,100,1,0,1,{max(4, size // 11)},{max(3, size // 14)},2,70,70,{cap_margin},1
+Style: CapBox,{f['caption']},{size},{text},{accent},{accent},&H00000000,0,0,0,0,100,100,1,0,3,{max(4, size // 10)},0,2,70,70,{cap_margin},1
 Style: Hook,{f['caption']},{round(size * 1.35)},{text},{accent},{outline},&H80000000,0,0,0,0,100,100,1,0,1,{max(4, size // 9)},{max(2, size // 20)},5,80,80,0,1
 Style: Banner,{f['title']},{round(size * 0.55)},{primary},{text},{accent},{accent},0,0,0,0,100,100,2,0,3,{round(size * 0.22)},0,8,60,60,{round(height * 0.08)},1
 Style: End,{f['title']},{round(size * 0.9)},{text},{accent},{primary},&H00000000,0,0,0,0,100,100,1,0,1,0,0,5,80,80,0,1
@@ -108,38 +109,47 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     # Hook: banner + big question over the opening seconds.
     hook = style["hook"]
     hd = hook["duration"]
-    if plan.get("hook") and not plan["hook"].startswith("TODO"):
-        ev.append(f"Dialogue: 2,{ts(offset)},{ts(offset + hd)},Banner,,0,0,0,,{pop}{clean(hook['banner_text'])}")
+    if hook.get("enabled", True) and plan.get("hook") and not plan["hook"].startswith("TODO"):
+        ev.append(f"Dialogue: 3,{ts(offset)},{ts(offset + hd)},Banner,,0,0,0,,{pop}{clean(hook['banner_text'])}")
         hook_txt = clean(plan["hook"].upper())
-        ev.append(f"Dialogue: 2,{ts(offset + 0.15)},{ts(offset + hd)},Hook,,0,0,0,,"
+        ev.append(f"Dialogue: 3,{ts(offset + 0.15)},{ts(offset + hd)},Hook,,0,0,0,,"
                   rf"{{\pos({width // 2},{round(height * 0.30)})\fad(0,200)}}{pop}{hook_txt}")
 
-    # Word-by-word captions.
+    # Word-by-word captions. highlight "box": the spoken word sits on an accent-colored box
+    # (house style); "color": the spoken word turns accent-colored.
     if cap["enabled"]:
         emph = {e.lower() for e in plan.get("emphasis", [])}
+        mode = cap.get("highlight", "box")
+        hide = r"{\alpha&HFF&}"
         for line in chunk(edited_words(plan, transcript), cap["words_per_line"]):
             end_line = line[-1]["e"] + 0.05
+            words = [clean(x["w"].upper() if cap["uppercase"] else x["w"]) for x in line]
+            if cap.get("strip_punctuation", True):
+                words = [re.sub(r"[.,!?;:]+$", "", w) for w in words]
             for i, w in enumerate(line):
                 start = w["s"]
                 stop = line[i + 1]["s"] if i + 1 < len(line) else end_line
-                parts = []
-                for j, x in enumerate(line):
-                    word = clean(x["w"].upper() if cap["uppercase"] else x["w"])
-                    is_emph = re.sub(r"[^\w']", "", x["w"].lower()) in emph
-                    if j == i and cap["highlight_active_word"]:
-                        parts.append(rf"{{\c{accent}\fscx112\fscy112}}{word}{{\c{text}\fscx100\fscy100}}")
-                    elif is_emph:
-                        parts.append(rf"{{\c{accent}}}{word}{{\c{text}}}")
+                base, box = [], []
+                for j, word in enumerate(words):
+                    is_emph = re.sub(r"[^\w']", "", line[j]["w"].lower()) in emph
+                    active = j == i and cap["highlight_active_word"]
+                    if active and mode == "color":
+                        base.append(rf"{{\c{accent}}}{word}{{\c{text}}}")
+                    elif is_emph and not active:
+                        base.append(rf"{{\c{accent}}}{word}{{\c{text}}}")
                     else:
-                        parts.append(word)
-                lead = pop if i == 0 else ""
-                ev.append(f"Dialogue: 1,{ts(offset + start)},{ts(offset + stop)},Caption,,0,0,0,,{lead}{' '.join(parts)}")
+                        base.append(word)
+                    # Box layer: same text so glyphs line up; only the active word is visible.
+                    box.append(rf"{{\alpha&H00&}}{word}{hide}" if active else word)
+                ev.append(f"Dialogue: 1,{ts(offset + start)},{ts(offset + stop)},Caption,,0,0,0,,{' '.join(base)}")
+                if mode == "box" and cap["highlight_active_word"]:
+                    ev.append(f"Dialogue: 2,{ts(offset + start)},{ts(offset + stop)},CapBox,,0,0,0,,{hide}{' '.join(box)}")
 
     # Generated end card (only when there is no outro video).
     if endcard and content_end is not None:
         a, b = content_end, content_end + endcard["duration"]
-        ev.append(f"Dialogue: 3,{ts(a)},{ts(b)},End,,0,0,0,,{{\\pos({width // 2},{round(height * 0.45)})}}{pop}{clean(endcard['text'])}")
-        ev.append(f"Dialogue: 3,{ts(a + 0.3)},{ts(b)},EndSub,,0,0,0,,{{\\pos({width // 2},{round(height * 0.55)})}}{pop}{clean(endcard['subtext'])}")
+        ev.append(f"Dialogue: 4,{ts(a)},{ts(b)},End,,0,0,0,,{{\\pos({width // 2},{round(height * 0.45)})}}{pop}{clean(endcard['text'])}")
+        ev.append(f"Dialogue: 4,{ts(a + 0.3)},{ts(b)},EndSub,,0,0,0,,{{\\pos({width // 2},{round(height * 0.55)})}}{pop}{clean(endcard['subtext'])}")
 
     return head + "\n".join(ev) + "\n"
 

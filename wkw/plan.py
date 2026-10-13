@@ -55,7 +55,9 @@ def make_plan(week, style):
         "hook": "TODO scroll-stopping question",
         "segments": segments,
         "emphasis": [],
-        "caption_fixes": {"alliance rv": "Alliance RV", "rv": "RV", "rvs": "RVs"},
+        "broll": [],  # cutaways: {"clip": i, "start": s, "end": e, "at": seconds into the edit}
+        "caption_fixes": {"what you know wednesday": "Whatcha Know Wednesday", "watcha": "Whatcha",
+                          "alliance rv": "Alliance RV", "rv": "RV", "rvs": "RVs", "pastry": "pass-through"},
         "thumbnail_time": 1.0,
         "social": {"caption": "", "hashtags": [style["show"]["hashtag"], "#AllianceRV", "#RVLife", "#RVTips"]},
     }

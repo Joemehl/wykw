@@ -1,22 +1,23 @@
 # Whatcha Know Wednesday: house style.
 # Every render reads this file. Change it here, not in code.
-# Values marked TODO are placeholders until we match them to a real past episode.
+# Matched to the 2026-10-07 Starlink episode (captions, colors, outro).
 
 show:
   name: "Whatcha Know Wednesday"
   brand: "Alliance RV"
   hashtag: "#WhatchaKnowWednesday"
   handle: "@AllianceRV"             # TODO: confirm the handle you tag on each platform
+  academy_url: "AllianceRV.com/Academy"
 
 colors:                             # hex RGB
-  primary: "#0B2545"                # TODO: Alliance RV brand navy
-  accent: "#F5B700"                 # TODO: the highlight color for the spoken word / banners
+  primary: "#000000"                # outro / card background (the logo outro is on black)
+  accent: "#00C9E0"                 # caption highlight box, measured from the episode
   text: "#FFFFFF"
   outline: "#000000"
 
 fonts:
   dir: brand/fonts
-  caption: "Anton"                  # tall condensed font, reads well on phones
+  caption: "Montserrat Black"       # heavy geometric caps, as in the episode captions
   title: "Montserrat ExtraBold"
 
 # Each entry is one deliverable rendered from the same edit.
@@ -28,40 +29,46 @@ formats:
 framing:
   fit: crop                         # crop = fill the frame (talking head); blur = letterbox on blurred copy
   crop_center_x: 0.5                # 0 = left edge, 1 = right edge; shift if the host stands off-center
-  punch_in: 1.12                    # alternate jump cuts between 1.0x and this zoom for energy (1.0 = off)
+  punch_in: 1.08                    # alternate jump cuts between 1.0x and this zoom so cuts don't look like skips (1.0 = off)
 
 cutting:
-  max_pause: 0.55                   # seconds of silence allowed before we cut it out
-  pad: 0.10                         # breathing room kept around each spoken segment
+  max_pause: 0.45                   # seconds of silence allowed before we cut it out
+  pad: 0.08                         # breathing room kept around each spoken segment
   min_segment: 0.40                 # drop crumbs shorter than this
   fillers: ["um", "uh", "uhm", "erm", "ah", "hmm", "mm"]
 
 captions:
   enabled: true
-  words_per_line: 3
-  size: 0.058                       # fraction of video height
-  position_y: 0.68                  # fraction of height for the caption baseline
+  words_per_line: 4                 # wraps to two lines on long words, like the episode
+  size: 0.044                       # fraction of video height
+  position_y: 0.80                  # fraction of height for the caption bottom
   uppercase: true
+  strip_punctuation: true
   highlight_active_word: true
+  highlight: box                    # box = spoken word on an accent box (house style); color = accent text
 
-hook:                               # big text over the first seconds: stops the scroll
+hook:                               # big question over the first seconds. Off: the show opens on "Hey Allies"
+  enabled: false
   duration: 3.0
   banner_text: "WHATCHA KNOW WEDNESDAY"
 
-endcard:                            # used only when brand/assets/outro.mp4 is missing
+endcard:
+  fade_to_black: 0.45               # dip the last shot to black before the outro, as in the episode
+  # Generated card, used only when brand/assets/outro.mp4 is missing:
   duration: 2.5
   text: "NEW RV TIPS EVERY WEDNESDAY"
-  subtext: "Follow @AllianceRV"
+  subtext: "AllianceRV.com/Academy"
 
 audio:
   loudness_lufs: -14                # social platform target
-  music_volume: 0.12                # bed level under the voice (ducked further while talking)
+  music_volume: 0.12                # bed level under the voice (ducked further while talking); episode had none
 
 assets:                             # optional: dropped in brand/assets/, used automatically when present
-  logo: brand/assets/logo.png       # transparent PNG bug, top-right
-  intro: brand/assets/intro.mp4     # branded sting before the episode
-  outro: brand/assets/outro.mp4     # branded end card
+  logo: brand/assets/logo.png       # transparent PNG bug, top-right (episode had none)
+  intro: brand/assets/intro.mp4     # branded sting before the episode (episode had none)
+  outro: brand/assets/outro.mp4     # Alliance RV logo + AllianceRV.com/Academy write-on (cut from the episode)
   music: brand/assets/music.mp3     # licensed music bed
 
 transcription:
-  model: small.en                   # faster-whisper model; base.en is faster, medium.en more accurate
+  backend: parakeet                 # parakeet (default, works in the cloud) or whisper (needs huggingface.co)
+  model: small.en                   # whisper model name, only used with backend: whisper

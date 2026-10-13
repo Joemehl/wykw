@@ -26,12 +26,16 @@ def fit_filter(style, W, H, zoom):
             f"crop={W}:{H}:'(iw-{W})*{cx}':'(ih-{H})/2'")
 
 
-def render_piece(src, start, dur, out, style, W, H, fps, zoom, has_audio, fade=True):
-    vf = f"[0:v]{fit_filter(style, W, H, zoom)},fps={fps},setsar=1,format=yuv420p[v]"
+def render_piece(src, start, dur, out, style, W, H, fps, zoom, has_audio, fade=True, fade_black=0.0):
+    vf = f"[0:v]{fit_filter(style, W, H, zoom)},fps={fps},setsar=1,format=yuv420p"
+    if fade_black:  # dip the last shot to black before the outro
+        vf += f",fade=t=out:st={max(0, dur - fade_black):.3f}:d={fade_black}"
+    vf += "[v]"
     if has_audio:
         af = "[0:a]aresample=48000,aformat=channel_layouts=stereo"
         if fade:  # tiny fades stop clicks at jump cuts
-            af += f",afade=t=in:d=0.02,afade=t=out:st={max(0, dur - 0.03):.3f}:d=0.03"
+            out_d = max(0.03, fade_black)
+            af += f",afade=t=in:d=0.02,afade=t=out:st={max(0, dur - out_d):.3f}:d={out_d:.3f}"
         af += f",apad,atrim=0:{dur:.3f}[a]"
         cmd = ["ffmpeg", "-y", "-ss", f"{start:.3f}", "-t", f"{dur:.3f}", "-i", str(src),
                "-filter_complex", f"{vf};{af}", "-map", "[v]", "-map", "[a]"]
@@ -83,7 +87,9 @@ def render(week, style, only=None):
             dur = s["end"] - s["start"]
             z = zoom if (k % 2 == 1 and zoom > 1.0) else 1.0
             p = tmp / f"{k + 1:03d}_seg.mkv"
-            render_piece(clips[s["clip"]], s["start"], dur, p, style, W, H, fps, z, infos[s["clip"]]["has_audio"])
+            last = k == len(segs) - 1
+            render_piece(clips[s["clip"]], s["start"], dur, p, style, W, H, fps, z, infos[s["clip"]]["has_audio"],
+                         fade_black=style["endcard"].get("fade_to_black", 0.0) if last else 0.0)
             pieces.append(p)
         content_end = offset + content_len
 
@@ -109,11 +115,22 @@ def render(week, style, only=None):
         ass_path.write_text(build_ass(plan, transcript, style, W, H, offset=offset,
                                       content_end=content_end, endcard=endcard))
 
-        # Finishing pass.
+        # B-roll cutaways: picture only, laid over the edit while the host keeps talking.
         inputs = ["-i", str(joined)]
-        fc = [f"[0:v]ass='{ass_path}':fontsdir='{fonts_dir}'[vs]"]
+        fc, vlast, n = [], "0:v", 1
+        for b, br in enumerate(plan.get("broll", [])):
+            bdur = br["end"] - br["start"]
+            p = tmp / f"broll_{b + 1:02d}.mkv"
+            render_piece(clips[br["clip"]], br["start"], bdur, p, style, W, H, fps, 1.0, False, fade=False)
+            at = offset + br["at"]
+            inputs += ["-i", str(p)]
+            fc.append(f"[{n}:v]setpts=PTS-STARTPTS+{at:.3f}/TB[b{n}]")
+            fc.append(f"[{vlast}][b{n}]overlay=eof_action=pass:enable='between(t,{at:.3f},{at + bdur:.3f})'[vb{n}]")
+            vlast, n = f"vb{n}", n + 1
+
+        # Finishing pass.
+        fc.append(f"[{vlast}]ass='{ass_path}':fontsdir='{fonts_dir}'[vs]")
         vlast = "vs"
-        n = 1
         if logo:
             inputs += ["-i", str(logo)]
             lw = round(min(W, H) * 0.16)

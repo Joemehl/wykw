@@ -3,22 +3,23 @@
 Drop in 1–2 raw MP4s. Get back a captioned, jump-cut, branded vertical episode, a thumbnail and post copy.
 
 ```
-raw clips ─► transcribe (Whisper, word timing) ─► edit_plan.json ─► render
+raw clips ─► transcribe (Parakeet, word timing) ─► edit_plan.json ─► render
                                                    ▲ Claude edits:      ├─ WKW_<date>_vertical.mp4
                                                    │ cut flubs, hook,   ├─ WKW_<date>_vertical_thumb.jpg
                                                    │ title, emphasis    └─ post.txt (caption + hashtags)
 ```
 
-What the render does: removes pauses and "um/uh", alternates 1.0×/1.12× punch-in on jump cuts, adds word-by-word
-pop captions with the spoken word highlighted, a "WHATCHA KNOW WEDNESDAY" banner with a hook question over the
-first 3 s, an optional logo bug, intro/outro, a ducked music bed, and loudness set to -14 LUFS for social.
+What the render does: removes pauses and "um/uh", adds a slight punch-in on alternate jump cuts, lays B-roll
+cutaways over the host's voice, burns in word-by-word captions with the spoken word on a cyan box, dips the
+last shot to black into the Alliance RV logo outro, and sets loudness to -14 LUFS for social. Optional: hook
+banner, logo bug, intro, ducked music bed.
 
 ## Weekly use (in Claude Code)
 
-1. Upload the footage to Google Drive or Dropbox and share it as **"Anyone with the link"**.
-2. Open a Claude Code session on this repo and say:
-   > Edit this week's WKW: <link 1> <link 2>. Topic is the water heater bypass.
-3. Claude downloads, transcribes, edits, renders, checks the result, and sends you the files.
+1. Open a Claude Code session on this repo and attach the raw MP4s (or paste Google Drive / Dropbox links
+   shared as **"Anyone with the link"**), then say:
+   > Edit this week's WKW. Topic is the water heater bypass. Clip 2 is B-roll of the valve.
+2. Claude downloads, transcribes, edits, renders, checks the result, and sends you the files.
    Reply with notes ("tighter", "different hook") and Claude re-renders.
 
 **Running locally instead** (Claude Code desktop/CLI on your computer, no upload needed): copy the MP4s into
@@ -28,14 +29,14 @@ first 3 s, an optional logo bug, intro/outro, a ducked music bed, and loudness s
 
 | Item | Where | Status |
 |---|---|---|
-| Network: allow `huggingface.co` (Whisper model download) | cloud environment settings → Network access | **required for cloud** |
-| Network: allow `drive.google.com`, `drive.usercontent.google.com` (or `dropbox.com`, `dl.dropboxusercontent.com`) | same | required for link intake |
-| Brand colors, handle | `brand/style.yaml` | placeholders: replace |
-| Logo (transparent PNG) | `brand/assets/logo.png` | optional |
-| Intro / outro stings | `brand/assets/intro.mp4`, `outro.mp4` | optional (a generated end card is used otherwise) |
+| Transcription model (Parakeet, ~650 MB) | auto-downloads from GitHub on first run | works in cloud as is |
+| Network: allow `drive.google.com`, `drive.usercontent.google.com` (or `dropbox.com`, `dl.dropboxusercontent.com`) | cloud environment settings → Network access | only for link intake; uploading in chat needs nothing |
+| House style (captions, cyan #00C9E0, Montserrat Black) | `brand/style.yaml` | matched to the 2026-10-07 episode |
+| Logo outro (AllianceRV.com/Academy) | `brand/assets/outro.mp4` | cut from the 2026-10-07 episode |
+| Logo bug (transparent PNG) / intro sting | `brand/assets/logo.png`, `intro.mp4` | optional, not used by the show today |
 | Licensed music bed | `brand/assets/music.mp3` | optional |
 
-Fonts (Anton, Montserrat ExtraBold, both under the SIL Open Font License) are bundled in `brand/fonts/`.
+Fonts (Montserrat Black/ExtraBold, Anton, all under the SIL Open Font License) are bundled in `brand/fonts/`.
 
 ## Commands
 

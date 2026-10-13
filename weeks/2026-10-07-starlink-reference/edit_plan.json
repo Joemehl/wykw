@@ -1,0 +1,35 @@
+{
+  "status": "reference",
+  "title": "Starlink vs Starlink Mini",
+  "hook": "TODO scroll-stopping question",
+  "segments": [
+    {
+      "clip": 0,
+      "start": 0.266,
+      "end": 9.226,
+      "text": "Hey Allies, I'm excited for another What You Know Wednesday. Today we're going to talk a little bit about Starlink. Most of our Alliance units are equipped with an input."
+    },
+    {
+      "clip": 0,
+      "start": 9.546,
+      "end": 27.578,
+      "text": "In the pass-through storage bay, and also another one on the inside. Well, Starlink has two systems now: they have the Starlink, and then they have a Starlink Mini. If you have the standard Starlink, you are going to need to use these plug-ins. If you get the newer mini, That is old Bluetooth enabled, so you're not going to need those same connection ports. So now you know."
+    }
+  ],
+  "emphasis": [],
+  "caption_fixes": {
+    "alliance rv": "Alliance RV",
+    "rv": "RV",
+    "rvs": "RVs"
+  },
+  "thumbnail_time": 1.0,
+  "social": {
+    "caption": "Reference: the finished 2026-10-07 episode (already captioned). Used to match house style.",
+    "hashtags": [
+      "#WhatchaKnowWednesday",
+      "#AllianceRV",
+      "#RVLife",
+      "#RVTips"
+    ]
+  }
+}
